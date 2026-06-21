@@ -167,10 +167,81 @@
   .small-note{font-size:11.5px; color:var(--muted); margin-top:6px;}
   .footer-note{text-align:center; font-size:11.5px; color:var(--muted); margin-top:24px;}
   .browser-warn{background:#FCEEEC; border:1px solid #F1C3BC; color:var(--warn); padding:10px 14px; border-radius:10px; font-size:12.5px; margin-bottom:12px;}
+
+  /* LOGIN SCREEN */
+  .login-screen{
+    min-height:100vh; display:flex; align-items:center; justify-content:center; padding:24px;
+    background:linear-gradient(135deg, var(--navy) 0%, var(--navy-light) 100%);
+  }
+  .login-card{
+    background:#fff; border-radius:20px; padding:36px 32px; max-width:420px; width:100%; text-align:center;
+    box-shadow:0 20px 50px -15px rgba(11,37,69,0.5);
+  }
+  .login-title{
+    font-family:'Outfit',sans-serif; font-weight:800; font-size:38px; color:var(--navy); margin:6px 0 0; letter-spacing:-0.5px;
+  }
+  .login-subtitle{
+    font-family:'Outfit',sans-serif; font-weight:700; font-size:15px; color:var(--gold); margin:2px 0 4px;
+    text-transform:uppercase; letter-spacing:1.5px;
+  }
+  .login-tagline{font-size:12.5px; color:var(--muted); margin:0 0 22px;}
+  .login-form{text-align:left;}
+  .login-label{display:block; font-size:12px; font-weight:700; color:var(--navy); margin:14px 0 5px;}
+  .login-input{
+    width:100%; padding:11px 13px; border-radius:10px; border:1.5px solid #ECE5D4; font-family:'Nunito',sans-serif;
+    font-size:14px; background:#fff; color:var(--ink);
+  }
+  .login-input:focus{outline:none; box-shadow:var(--ring); border-color:var(--gold-light);}
+  .login-btn{width:100%; justify-content:center; margin-top:22px; padding:13px; font-size:14.5px;}
+  .login-error{color:var(--warn); font-size:12.5px; font-weight:700; min-height:18px; margin-top:10px;}
+  .loggedin-line{margin:10px 0 0; font-size:12px; color:#cdd9ea; position:relative; z-index:1;}
+  .loggedin-line button{
+    background:none; border:none; color:var(--gold-light); font-weight:700; cursor:pointer; font-size:12px;
+    text-decoration:underline; padding:0; margin-left:8px; font-family:'Nunito',sans-serif;
+  }
 </style>
 </head>
 <body>
-<div class="app">
+
+<div class="login-screen" id="loginScreen">
+  <div class="login-card">
+    <div class="brandmark" style="margin:0 auto 14px;">K</div>
+    <h1 class="login-title">Marungko</h1>
+    <p class="login-subtitle">Practice Reading</p>
+    <p class="login-tagline">Project KABULIG &middot; SDO Romblon</p>
+
+    <div class="login-form">
+      <label class="login-label">Pangalan ng Mag-aaral</label>
+      <input type="text" id="loginName" placeholder="Juan dela Cruz" class="login-input">
+
+      <label class="login-label">Paaralan</label>
+      <input type="text" id="loginSchool" placeholder="Hal. Romblon Central Elementary School" class="login-input">
+
+      <label class="login-label">Distrito</label>
+      <select id="loginDistrict" class="login-input">
+        <option value="">— Piliin ang distrito —</option>
+        <option>Alcantara</option>
+        <option>Banton</option>
+        <option>Corcuera</option>
+        <option>Concepcion</option>
+        <option>Looc</option>
+        <option>San Fernando</option>
+        <option>Cajidiocan-Magdiwang</option>
+        <option>Romblon</option>
+        <option>San Andres</option>
+        <option>Odiongan North</option>
+        <option>Odiongan South</option>
+        <option>San Agustin-Santa Maria-Calatrava</option>
+        <option>San Jose-Santa Fe</option>
+      </select>
+
+      <button class="btn btn-gold login-btn" id="loginBtn">Mag-log In →</button>
+      <p class="login-error" id="loginError"></p>
+    </div>
+  </div>
+</div>
+
+<div class="app" id="mainApp" style="display:none;">
 
   <div class="topbar">
     <div class="brandrow">
@@ -181,6 +252,7 @@
       </div>
     </div>
     <p class="subline">Buong Marungko sequence mula sa tunog patungong pantig, salita, at pangungusap — may boses na gabay at pagsusuri ng pagbasa nang malakas.</p>
+    <p class="loggedin-line" id="loggedInLine"></p>
   </div>
 
   <div class="tabs">
@@ -193,6 +265,7 @@
   <div class="panel active" id="panel-discussion">
     <div class="card">
       <span class="pill">Tungkol sa Marungko Approach</span>
+
       <h2>Bakit tunog muna, hindi alpabeto?</h2>
       <p class="muted">Sa Marungko Approach, hindi sinusunod ang A-B-K. Sa halip, sinisimulan sa mga tunog na pinakamadaling bigkasin at pinakamadalas marinig ng bata, para mas mabilis silang makabuo ng pantig at salita. Sundan ang pagkakasunod-sunod sa ibaba — i-click ang bawat kard para marinig ang tunog.</p>
     </div>
@@ -280,13 +353,9 @@
 
     <div class="card">
       <h3>I-log sa Google Sheets (opsyonal)</h3>
+      <p class="small-note" id="loggedInLine2" style="margin-bottom:10px;"></p>
       <div class="form-row">
-        <input type="text" id="studentName" placeholder="Pangalan ng mag-aaral">
-        <input type="text" id="studentSection" placeholder="Baitang / Seksyon">
-      </div>
-      <div class="form-row">
-        <input type="text" id="studentSchool" placeholder="Paaralan">
-        <input type="text" id="studentDistrict" placeholder="Distrito">
+        <input type="text" id="studentSection" placeholder="Baitang / Seksyon (opsyonal)">
       </div>
       <div class="form-row">
         <input type="text" id="gasUrl" value="https://script.google.com/macros/s/AKfycbwPAfqwKe63wuWhzxvjn72zBTVoYhzg--8MlNzrMwrDCB31J2PSR36VG6w2pQ7RENDH/exec" placeholder="I-paste ang Google Apps Script Web App URL (kung meron)">
@@ -360,7 +429,8 @@ let blend = {cons:null, vowel:null};
 let wordBuilderState = {};
 let currentLevelKey = 'tunog';
 let currentIndex = 0;
-let stats = {tunog:{a:0,c:0}, pantig:{a:0,c:0}, salita:{a:0,c:0}, pangungusap:{a:0,c:0}};
+let stats = {tunog:{a:0,c:0}, pantig:{a:0,c:0}, salita:{a:0,c:0}, pangungusap:{a:0,c:0}, talata:{a:0,c:0}};
+let currentStudent = {name:'', school:'', district:''};
 let recognition = null;
 let listening = false;
 let speakStartTime = null;
@@ -659,7 +729,7 @@ function wordLevelAccuracy(transcript, target){
       const sim = similarity(sw, tw);
       if(sim > bestSim){ bestSim = sim; bestIdx = idx; }
     });
-    if(bestIdx >= 0 && bestSim >= 0.75){ matched++; used[bestIdx] = true; }
+    if(bestIdx >= 0 && bestSim >= 0.9){ matched++; used[bestIdx] = true; }
   });
   return matched / targetWords.length;
 }
@@ -689,6 +759,8 @@ if(!SR){
         document.getElementById('micBtn').textContent = '⏹';
         document.getElementById('feedback').className = 'feedback';
         document.getElementById('feedback').textContent = 'Nakikinig... i-tap ulit ang ⏹ kapag tapos na basahin.';
+        document.getElementById('transcriptLine').textContent = '';
+        document.getElementById('statWpm').textContent = '—';
       }
     }
   };
@@ -709,7 +781,7 @@ if(!SR){
       }
       document.getElementById('transcriptLine').textContent = 'Narinig: "' + heard + '"';
       const bestSim = wordLevelAccuracy(heard, target);
-      const threshold = currentLevelKey === 'pangungusap' ? 0.85 : 0.8;
+      const threshold = 1;
       const isCorrect = bestSim >= threshold;
       stats[currentLevelKey].a++;
       if(isCorrect) stats[currentLevelKey].c++;
@@ -719,7 +791,7 @@ if(!SR){
       if(isCorrect){
         fbEl.className = 'feedback good';
         fbEl.textContent = '✓ Magaling! Tamang pagbasa.';
-        speakPraise();
+        setTimeout(speakPraise, 300);
       } else {
         fbEl.className = 'feedback bad';
         fbEl.textContent = '✗ Subukan ulit. May salitang hindi nabigkas o nagkamali.';
@@ -762,7 +834,7 @@ if(!SR){
         span.textContent = 'Narinig: "' + bestTranscript + '"';
         if(bestSim >= 0.65){
           span.style.color = 'var(--good)';
-          speakPraise();
+          setTimeout(speakPraise, 300);
         } else {
           span.style.color = 'var(--warn)';
         }
@@ -782,7 +854,7 @@ if(!SR){
       tEl.textContent = 'Narinig: "' + bestTranscript + '"';
       if(bestSim >= 0.6){
         tEl.style.color = 'var(--good)';
-        speakPraise();
+        setTimeout(speakPraise, 300);
       } else {
         tEl.style.color = 'var(--warn)';
       }
@@ -814,7 +886,7 @@ if(!SR){
     }
     document.getElementById('transcriptLine').textContent = 'Narinig: "' + bestTranscript + '"';
 
-    const threshold = currentLevelKey === 'tunog' ? 0.5 : 0.65;
+    const threshold = currentLevelKey === 'tunog' ? 0.5 : (currentLevelKey === 'salita' ? 0.92 : 0.65);
     const isCorrect = bestSim >= threshold;
     stats[currentLevelKey].a++;
     if(isCorrect) stats[currentLevelKey].c++;
@@ -825,7 +897,7 @@ if(!SR){
       fbEl.className = 'feedback good';
       const praises = ['Magaling!', 'Tama!', 'Husay!', 'Mahusay!'];
       fbEl.textContent = '✓ ' + praises[Math.floor(Math.random()*praises.length)];
-      speakPraise();
+      setTimeout(speakPraise, 300);
     } else {
       fbEl.className = 'feedback bad';
       fbEl.textContent = currentLevelKey === 'tunog'
@@ -849,10 +921,7 @@ document.getElementById('micBtn').addEventListener('click', () => {
 /* ================= GOOGLE SHEETS LOGGING ================= */
 document.getElementById('logBtn').addEventListener('click', () => {
   const url = document.getElementById('gasUrl').value.trim();
-  const name = document.getElementById('studentName').value.trim();
   const section = document.getElementById('studentSection').value.trim();
-  const school = document.getElementById('studentSchool').value.trim();
-  const district = document.getElementById('studentDistrict').value.trim();
   const statusEl = document.getElementById('logStatus');
 
   if(!url){
@@ -861,10 +930,10 @@ document.getElementById('logBtn').addEventListener('click', () => {
     return;
   }
   const payload = {
-    pangalan: name || '(walang pangalan)',
+    pangalan: currentStudent.name || '(walang pangalan)',
     seksyon: section || '',
-    paaralan: school || '',
-    distrito: district || '',
+    paaralan: currentStudent.school || '',
+    distrito: currentStudent.district || '',
     antas: LEVELS[currentLevelKey].label,
     subok: stats[currentLevelKey].a,
     tama: stats[currentLevelKey].c,
@@ -882,6 +951,30 @@ document.getElementById('logBtn').addEventListener('click', () => {
   }).catch(() => {
     statusEl.textContent = 'May error sa pagpadala. Suriin ang URL.';
     statusEl.style.color = 'var(--warn)';
+  });
+});
+
+/* ================= LOGIN ================= */
+document.getElementById('loginBtn').addEventListener('click', () => {
+  const name = document.getElementById('loginName').value.trim();
+  const school = document.getElementById('loginSchool').value.trim();
+  const district = document.getElementById('loginDistrict').value;
+  const errEl = document.getElementById('loginError');
+
+  if(!name || !school || !district){
+    errEl.textContent = 'Pakipunan ang pangalan, paaralan, at piliin ang distrito.';
+    return;
+  }
+  errEl.textContent = '';
+  currentStudent = {name, school, district};
+  document.getElementById('loginScreen').style.display = 'none';
+  document.getElementById('mainApp').style.display = 'block';
+  const line = 'Naka-login: ' + name + ' · ' + school + ' · ' + district;
+  document.getElementById('loggedInLine').innerHTML = line + ' <button id="logoutBtn">Mag-log out</button>';
+  document.getElementById('loggedInLine2').textContent = line;
+  document.getElementById('logoutBtn').addEventListener('click', () => {
+    document.getElementById('mainApp').style.display = 'none';
+    document.getElementById('loginScreen').style.display = 'flex';
   });
 });
 
