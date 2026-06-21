@@ -211,9 +211,6 @@
     <p class="login-tagline">Project KABULIG &middot; SDO Romblon</p>
 
     <div class="login-form">
-      <label class="login-label">Pangalan ng Mag-aaral</label>
-      <input type="text" id="loginName" placeholder="Juan dela Cruz" class="login-input">
-
       <label class="login-label">Paaralan</label>
       <input type="text" id="loginSchool" placeholder="Hal. Romblon Central Elementary School" class="login-input">
 
@@ -237,6 +234,7 @@
 
       <button class="btn btn-gold login-btn" id="loginBtn">Mag-log In →</button>
       <p class="login-error" id="loginError"></p>
+      <p class="login-error" id="loginLogStatus" style="color:var(--good);"></p>
     </div>
   </div>
 </div>
@@ -355,6 +353,7 @@
       <h3>I-log sa Google Sheets (opsyonal)</h3>
       <p class="small-note" id="loggedInLine2" style="margin-bottom:10px;"></p>
       <div class="form-row">
+        <input type="text" id="studentName" placeholder="Pangalan ng mag-aaral">
         <input type="text" id="studentSection" placeholder="Baitang / Seksyon (opsyonal)">
       </div>
       <div class="form-row">
@@ -926,6 +925,7 @@ document.getElementById('micBtn').addEventListener('click', () => {
 document.getElementById('logBtn').addEventListener('click', () => {
   const url = document.getElementById('gasUrl').value.trim();
   const section = document.getElementById('studentSection').value.trim();
+  const name = document.getElementById('studentName').value.trim();
   const statusEl = document.getElementById('logStatus');
 
   if(!url){
@@ -934,7 +934,7 @@ document.getElementById('logBtn').addEventListener('click', () => {
     return;
   }
   const payload = {
-    pangalan: currentStudent.name || '(walang pangalan)',
+    pangalan: name || '(walang pangalan)',
     seksyon: section || '',
     paaralan: currentStudent.school || '',
     distrito: currentStudent.district || '',
@@ -960,26 +960,52 @@ document.getElementById('logBtn').addEventListener('click', () => {
 
 /* ================= LOGIN ================= */
 document.getElementById('loginBtn').addEventListener('click', () => {
-  const name = document.getElementById('loginName').value.trim();
   const school = document.getElementById('loginSchool').value.trim();
   const district = document.getElementById('loginDistrict').value;
   const errEl = document.getElementById('loginError');
+  const logStatusEl = document.getElementById('loginLogStatus');
 
-  if(!name || !school || !district){
-    errEl.textContent = 'Pakipunan ang pangalan, paaralan, at piliin ang distrito.';
+  if(!school || !district){
+    errEl.textContent = 'Pakipunan ang paaralan at piliin ang distrito.';
     return;
   }
   errEl.textContent = '';
-  currentStudent = {name, school, district};
+  currentStudent = {name:'', school, district};
   document.getElementById('loginScreen').style.display = 'none';
   document.getElementById('mainApp').style.display = 'block';
-  const line = 'Naka-login: ' + name + ' · ' + school + ' · ' + district;
+  const line = 'Naka-login: ' + school + ' · ' + district;
   document.getElementById('loggedInLine').innerHTML = line + ' <button id="logoutBtn">Mag-log out</button>';
   document.getElementById('loggedInLine2').textContent = line;
   document.getElementById('logoutBtn').addEventListener('click', () => {
     document.getElementById('mainApp').style.display = 'none';
     document.getElementById('loginScreen').style.display = 'flex';
   });
+
+  // Auto-record ang login event sa Google Sheets
+  const url = document.getElementById('gasUrl').value.trim();
+  if(url){
+    const loginPayload = {
+      pangalan: '(login lang)',
+      seksyon: '',
+      paaralan: school,
+      distrito: district,
+      antas: 'LOG-IN',
+      subok: '',
+      tama: '',
+      katumpakan: '',
+      petsa: new Date().toISOString()
+    };
+    fetch(url, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(loginPayload)
+    }).then(() => {
+      logStatusEl.textContent = '✓ Narekord ang login.';
+    }).catch(() => {
+      logStatusEl.textContent = '';
+    });
+  }
 });
 
 /* ================= INIT ================= */
