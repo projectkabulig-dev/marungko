@@ -1,0 +1,901 @@
+<!DOCTYPE html>
+<html lang="fil">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KABULIG | Marungko Reading Tool</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy:#0B2545;
+    --navy-light:#13355e;
+    --gold:#C9A227;
+    --gold-light:#E8C765;
+    --cream:#FBF8F1;
+    --ink:#1C2733;
+    --muted:#5C6B7A;
+    --good:#2E7D5B;
+    --warn:#B23A2E;
+    --card:#FFFFFF;
+    --ring: 0 0 0 3px rgba(201,162,39,0.35);
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; background:var(--cream); color:var(--ink);
+    font-family:'Nunito',sans-serif;
+  }
+  h1,h2,h3,.display{font-family:'Outfit',sans-serif;}
+  .app{max-width:1100px; margin:0 auto; padding:18px 16px 60px;}
+
+  /* HEADER */
+  .topbar{
+    background:linear-gradient(135deg, var(--navy) 0%, var(--navy-light) 100%);
+    border-radius:18px; padding:22px 24px; color:#fff; position:relative; overflow:hidden;
+    box-shadow:0 10px 30px -10px rgba(11,37,69,0.5);
+  }
+  .topbar::after{
+    content:""; position:absolute; right:-40px; top:-40px; width:180px; height:180px;
+    background:radial-gradient(circle, rgba(201,162,39,0.35), transparent 70%);
+  }
+  .brandrow{display:flex; align-items:center; gap:14px; position:relative; z-index:1;}
+  .brandmark{
+    width:46px; height:46px; border-radius:12px; background:var(--gold);
+    display:flex; align-items:center; justify-content:center; font-weight:800; color:var(--navy);
+    font-family:'Outfit',sans-serif; font-size:20px; flex-shrink:0;
+  }
+  .brandrow h1{margin:0; font-size:22px; font-weight:800; letter-spacing:.2px;}
+  .brandrow p{margin:2px 0 0; font-size:13px; color:#cdd9ea; font-weight:600;}
+  .subline{margin:14px 0 0; font-size:13.5px; color:#dbe4f0; max-width:640px; line-height:1.5; position:relative; z-index:1;}
+
+  /* TABS */
+  .tabs{display:flex; gap:8px; margin:20px 0 18px; flex-wrap:wrap;}
+  .tab-btn{
+    border:2px solid transparent; background:#fff; color:var(--navy); font-family:'Outfit',sans-serif;
+    font-weight:700; font-size:13.5px; padding:10px 18px; border-radius:999px; cursor:pointer;
+    transition:.15s; box-shadow:0 1px 3px rgba(11,37,69,0.08);
+  }
+  .tab-btn:hover{transform:translateY(-1px);}
+  .tab-btn.active{background:var(--navy); color:#fff; border-color:var(--navy);}
+  .tab-btn .stepno{
+    display:inline-block; width:18px; height:18px; border-radius:50%; background:var(--gold); color:var(--navy);
+    font-size:11px; line-height:18px; text-align:center; margin-right:6px; font-weight:800;
+  }
+  .tab-btn.active .stepno{background:#fff;}
+
+  .panel{display:none;}
+  .panel.active{display:block; animation:fade .25s ease;}
+  @keyframes fade{from{opacity:0; transform:translateY(4px);} to{opacity:1; transform:translateY(0);}}
+
+  .card{
+    background:var(--card); border-radius:16px; padding:20px; box-shadow:0 2px 10px rgba(11,37,69,0.06);
+    border:1px solid #ECE5D4; margin-bottom:16px;
+  }
+  .card h2{margin:0 0 6px; font-size:17px; color:var(--navy); font-weight:800;}
+  .card h3{margin:0 0 8px; font-size:14.5px; color:var(--navy);}
+  .card p.muted{color:var(--muted); font-size:13.5px; line-height:1.6; margin:0 0 12px;}
+
+  .pill{
+    display:inline-block; background:#F1E9D1; color:#8a6d10; font-weight:700; font-size:11.5px;
+    padding:3px 10px; border-radius:999px; margin-bottom:10px;
+  }
+
+  /* SOUND GRID */
+  .sound-grid{
+    display:grid; grid-template-columns:repeat(auto-fill, minmax(108px,1fr)); gap:10px; margin-top:10px;
+  }
+  .sound-card{
+    border:2px solid #ECE5D4; border-radius:14px; padding:12px 8px; text-align:center; cursor:pointer;
+    background:#fff; transition:.15s; position:relative;
+  }
+  .sound-card:hover{border-color:var(--gold-light); transform:translateY(-2px);}
+  .sound-card.mastered{border-color:var(--good); background:#F2FAF6;}
+  .sound-card .emoji{font-size:26px; display:block;}
+  .sound-card .letter{font-family:'Outfit',sans-serif; font-weight:800; font-size:19px; color:var(--navy); margin-top:4px; display:block;}
+  .sound-card .word{font-size:11px; color:var(--muted); display:block;}
+  .sound-card .check{position:absolute; top:5px; right:7px; font-size:11px; color:var(--good); display:none;}
+  .sound-card.mastered .check{display:block;}
+
+  /* BUTTONS */
+  .btn{
+    font-family:'Outfit',sans-serif; font-weight:700; font-size:13.5px; border-radius:11px;
+    padding:10px 16px; border:none; cursor:pointer; transition:.15s; display:inline-flex; align-items:center; gap:7px;
+  }
+  .btn-gold{background:var(--gold); color:var(--navy);}
+  .btn-gold:hover{background:var(--gold-light);}
+  .btn-navy{background:var(--navy); color:#fff;}
+  .btn-navy:hover{background:var(--navy-light);}
+  .btn-outline{background:#fff; color:var(--navy); border:2px solid var(--navy);}
+  .btn-ghost{background:#F1E9D1; color:#7a5e0c;}
+  .btn:disabled{opacity:.45; cursor:not-allowed;}
+  .btn:focus-visible, .sound-card:focus-visible, .tile:focus-visible, input:focus-visible{outline:none; box-shadow:var(--ring);}
+
+  /* MANIPULATIVES */
+  .builder{display:flex; flex-wrap:wrap; gap:10px; align-items:center; margin:14px 0;}
+  .tile{
+    font-family:'Outfit',sans-serif; font-weight:800; font-size:17px; color:var(--navy);
+    background:#fff; border:2px solid #ECE5D4; border-radius:10px; padding:10px 16px; cursor:pointer; user-select:none;
+  }
+  .tile:hover{border-color:var(--gold-light);}
+  .tile.selected{background:var(--navy); color:#fff; border-color:var(--navy);}
+  .blend-display{
+    font-family:'Outfit',sans-serif; font-size:30px; font-weight:800; color:var(--navy);
+    background:#FBF6E8; border:2px dashed var(--gold-light); border-radius:14px; padding:16px 24px;
+    min-width:120px; text-align:center;
+  }
+  .wordbank{display:flex; flex-wrap:wrap; gap:8px; margin-top:10px;}
+  .wordchip{
+    background:#F4F0E2; padding:7px 13px; border-radius:999px; font-weight:700; font-size:13px; color:var(--navy);
+    cursor:pointer; border:2px solid transparent;
+  }
+  .wordchip:hover{border-color:var(--gold-light);}
+
+  /* EXERCISES */
+  .level-nav{display:flex; gap:8px; flex-wrap:wrap; margin-bottom:14px;}
+  .level-chip{
+    font-size:12.5px; font-weight:700; padding:7px 13px; border-radius:999px; background:#fff;
+    border:2px solid #ECE5D4; color:var(--navy); cursor:pointer;
+  }
+  .level-chip.active{background:var(--navy); color:#fff; border-color:var(--navy);}
+  .target-box{
+    background:linear-gradient(135deg,#FBF6E8,#FDFAF0); border:2px solid var(--gold-light); border-radius:16px;
+    padding:28px; text-align:center; margin:16px 0;
+  }
+  .target-text{font-family:'Outfit',sans-serif; font-weight:800; color:var(--navy); font-size:clamp(18px,4vw,32px); line-height:1.4;}
+  .mic-row{display:flex; gap:10px; justify-content:center; align-items:center; margin-top:16px; flex-wrap:wrap;}
+  .mic-btn{
+    width:60px; height:60px; border-radius:50%; background:var(--navy); color:#fff; border:none; font-size:24px;
+    cursor:pointer; display:flex; align-items:center; justify-content:center; transition:.15s;
+  }
+  .mic-btn.listening{background:var(--warn); animation:pulse 1s infinite;}
+  @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(178,58,46,0.5);} 70%{box-shadow:0 0 0 14px rgba(178,58,46,0);} 100%{box-shadow:0 0 0 0 rgba(178,58,46,0);}}
+  .feedback{margin-top:14px; font-weight:700; font-size:14.5px; min-height:22px;}
+  .feedback.good{color:var(--good);}
+  .feedback.bad{color:var(--warn);}
+  .transcript{font-size:12.5px; color:var(--muted); margin-top:4px;}
+  .score-row{display:flex; gap:14px; flex-wrap:wrap; margin-top:16px;}
+  .stat{
+    background:#fff; border:1px solid #ECE5D4; border-radius:12px; padding:10px 16px; text-align:center; min-width:90px;
+  }
+  .stat .num{font-family:'Outfit',sans-serif; font-weight:800; font-size:20px; color:var(--navy); display:block;}
+  .stat .lab{font-size:10.5px; color:var(--muted); text-transform:uppercase; letter-spacing:.4px;}
+
+  .form-row{display:flex; gap:10px; flex-wrap:wrap; margin-bottom:12px;}
+  .form-row input{
+    flex:1; min-width:160px; padding:9px 13px; border-radius:10px; border:1.5px solid #ECE5D4; font-family:'Nunito',sans-serif; font-size:13.5px;
+  }
+  .small-note{font-size:11.5px; color:var(--muted); margin-top:6px;}
+  .footer-note{text-align:center; font-size:11.5px; color:var(--muted); margin-top:24px;}
+  .browser-warn{background:#FCEEEC; border:1px solid #F1C3BC; color:var(--warn); padding:10px 14px; border-radius:10px; font-size:12.5px; margin-bottom:12px;}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <div class="topbar">
+    <div class="brandrow">
+      <div class="brandmark">K</div>
+      <div>
+        <h1>Marungko Reading Tool</h1>
+        <p>Project KABULIG &middot; SDO Romblon Numeracy &amp; Literacy Suite</p>
+      </div>
+    </div>
+    <p class="subline">Buong Marungko sequence mula sa tunog patungong pantig, salita, at pangungusap — may boses na gabay at pagsusuri ng pagbasa nang malakas.</p>
+  </div>
+
+  <div class="tabs">
+    <button class="tab-btn active" data-tab="discussion"><span class="stepno">1</span>Talakayan</button>
+    <button class="tab-btn" data-tab="manipulatives"><span class="stepno">2</span>Gawaing-kamay</button>
+    <button class="tab-btn" data-tab="exercises"><span class="stepno">3</span>Pagsasanay</button>
+  </div>
+
+  <!-- ============ TAB 1: DISCUSSION ============ -->
+  <div class="panel active" id="panel-discussion">
+    <div class="card">
+      <span class="pill">Tungkol sa Marungko Approach</span>
+      <h2>Bakit tunog muna, hindi alpabeto?</h2>
+      <p class="muted">Sa Marungko Approach, hindi sinusunod ang A-B-K. Sa halip, sinisimulan sa mga tunog na pinakamadaling bigkasin at pinakamadalas marinig ng bata, para mas mabilis silang makabuo ng pantig at salita. Sundan ang pagkakasunod-sunod sa ibaba — i-click ang bawat kard para marinig ang tunog.</p>
+    </div>
+
+    <div class="card">
+      <h3>Pagkakasunod-sunod ng 28 Tunog</h3>
+      <p class="muted" style="margin-bottom:14px;">Progreso: <span id="masteredCount">0</span> / 28 natapos pakinggan</p>
+      <div class="sound-grid" id="soundGrid"></div>
+      <div style="margin-top:16px; display:flex; gap:10px; flex-wrap:wrap;">
+        <button class="btn btn-outline" id="playAllBtn">▶ Pakinggan lahat nang sunod-sunod</button>
+        <button class="btn btn-outline" id="stopAllBtn">⏹ Itigil</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Paalala para sa Guro</h3>
+      <p class="muted" style="margin:0;">Huwag ituro lahat ng 28 tunog sa isang araw. Karaniwang itinatakda ito sa loob ng ilang linggo, 1-2 bagong tunog kada sesyon, may paulit-ulit na balik-aral. Gamitin ang tab na <strong>Gawaing-kamay</strong> para sa paghahalo ng tunog, at ang <strong>Pagsasanay</strong> para sa pagsubok ng pagbasa nang malakas.</p>
+    </div>
+  </div>
+
+  <!-- ============ TAB 2: MANIPULATIVES ============ -->
+  <div class="panel" id="panel-manipulatives">
+    <div class="card">
+      <span class="pill">Paghahalo ng Tunog</span>
+      <h2>Katinig + Patinig = Pantig</h2>
+      <p class="muted">Piliin ang isang katinig at isang patinig para mabuo at marinig ang pantig.</p>
+      <div class="builder">
+        <div>
+          <p class="small-note" style="margin-bottom:6px;">Katinig</p>
+          <div id="consTiles" class="builder" style="margin:0;"></div>
+        </div>
+      </div>
+      <div class="builder">
+        <div>
+          <p class="small-note" style="margin-bottom:6px;">Patinig</p>
+          <div id="vowelTiles" class="builder" style="margin:0;"></div>
+        </div>
+      </div>
+      <div class="builder" style="justify-content:center; margin-top:18px;">
+        <div class="blend-display" id="blendDisplay">— —</div>
+        <button class="mic-btn" id="blendMicBtn" style="width:50px;height:50px;font-size:20px;">🎤</button>
+        <button class="btn btn-outline" id="blendClearBtn">I-clear</button>
+      </div>
+      <div class="transcript" id="blendTranscript" style="text-align:center;"></div>
+    </div>
+
+    <div class="card">
+      <span class="pill">Pagbuo ng Salita</span>
+      <h2>Pantig-Pantig Patungong Salita</h2>
+      <p class="muted">I-click ang mga pantig sa tamang pagkasunod-sunod para mabuo ang salita. Tingnan ang larawan bilang pahiwatig.</p>
+      <div id="wordBuilderArea"></div>
+    </div>
+  </div>
+
+  <!-- ============ TAB 3: EXERCISES ============ -->
+  <div class="panel" id="panel-exercises">
+    <div id="micWarning"></div>
+    <div class="card">
+      <span class="pill">Pagsubok sa Pagbasa nang Malakas</span>
+      <h2>Apat na Antas ng Pagsasanay</h2>
+      <p class="muted">Piliin ang antas. I-tap ang mikropono, basahin nang malakas ang lamang sa kahon, at marinig kaagad ang puna.</p>
+      <div class="level-nav" id="levelNav"></div>
+    </div>
+
+    <div class="card">
+      <div class="target-box">
+        <div class="target-text" id="targetText">—</div>
+        <div class="small-note" id="targetHint" style="margin-top:8px;"></div>
+      </div>
+      <div class="mic-row">
+        <button class="mic-btn" id="micBtn">🎤</button>
+        <button class="btn btn-navy" id="hearBtn">🔊 Pakinggan</button>
+        <button class="btn btn-outline" id="nextBtn">Susunod →</button>
+      </div>
+      <div class="feedback" id="feedback"></div>
+      <div class="transcript" id="transcriptLine"></div>
+
+      <div class="score-row" id="scoreRow">
+        <div class="stat"><span class="num" id="statAttempts">0</span><span class="lab">Subok</span></div>
+        <div class="stat"><span class="num" id="statCorrect">0</span><span class="lab">Tama</span></div>
+        <div class="stat"><span class="num" id="statAcc">0%</span><span class="lab">Katumpakan</span></div>
+        <div class="stat"><span class="num" id="statWpm">—</span><span class="lab">Salita/Min</span></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>I-log sa Google Sheets (opsyonal)</h3>
+      <div class="form-row">
+        <input type="text" id="studentName" placeholder="Pangalan ng mag-aaral">
+        <input type="text" id="studentSection" placeholder="Baitang / Seksyon">
+      </div>
+      <div class="form-row">
+        <input type="text" id="studentSchool" placeholder="Paaralan">
+        <input type="text" id="studentDistrict" placeholder="Distrito">
+      </div>
+      <div class="form-row">
+        <input type="text" id="gasUrl" value="https://script.google.com/macros/s/AKfycbwPAfqwKe63wuWhzxvjn72zBTVoYhzg--8MlNzrMwrDCB31J2PSR36VG6w2pQ7RENDH/exec" placeholder="I-paste ang Google Apps Script Web App URL (kung meron)">
+      </div>
+      <button class="btn btn-ghost" id="logBtn">📤 I-save ang Resulta</button>
+      <p class="small-note" id="logStatus"></p>
+    </div>
+  </div>
+
+  <p class="footer-note">Project KABULIG &middot; SDO Romblon &middot; AI-assisted (hindi AI-generated) na kagamitan sa pagtuturo</p>
+</div>
+
+<script>
+/* ================= DATA: FULL MARUNGKO SEQUENCE ================= */
+const SOUNDS = [
+  {s:'m', w:'mama', e:'👩'}, {s:'a', w:'aso', e:'🐕'}, {s:'s', w:'sili', e:'🌶️'},
+  {s:'p', w:'pato', e:'🦆'}, {s:'t', w:'tubig', e:'💧'}, {s:'b', w:'bola', e:'⚽'},
+  {s:'i', w:'itlog', e:'🥚'}, {s:'n', w:'nanay', e:'👩‍🍼'}, {s:'e', w:'ekis', e:'✖️'},
+  {s:'o', w:'orasan', e:'⏰'}, {s:'k', w:'kape', e:'☕'}, {s:'d', w:'daga', e:'🐀'},
+  {s:'u', w:'uod', e:'🐛'}, {s:'g', w:'gatas', e:'🥛'}, {s:'w', w:'wasay', e:'🪓'},
+  {s:'l', w:'lobo', e:'🎈'}, {s:'h', w:'hangin', e:'💨'}, {s:'r', w:'relo', e:'⌚'},
+  {s:'y', w:'yelo', e:'🧊'}, {s:'ng', w:'ngipin', e:'🦷'}, {s:'c', w:'cake', e:'🍰'},
+  {s:'f', w:'flag', e:'🚩'}, {s:'j', w:'jeep', e:'🚐'}, {s:'ñ', w:'piña', e:'🍍'},
+  {s:'q', w:'queso', e:'🧀'}, {s:'v', w:'van', e:'🚗'}, {s:'x', w:'taxi', e:'🚕'},
+  {s:'z', w:'zoo', e:'🦁'}
+];
+const SOUND_KEYWORD_MAP = {};
+SOUNDS.forEach(item => { SOUND_KEYWORD_MAP[item.s] = item.w; });
+
+const CONSONANTS = ['m','s','p','t','b','n','k','d','g','w','l','h','r','y'];
+const VOWELS = ['a','i','e','o','u'];
+
+const SYLLABLE_WORDS = [
+  {w:'mama', parts:['ma','ma'], e:'👩'},
+  {w:'bata', parts:['ba','ta'], e:'🧒'},
+  {w:'sipa', parts:['si','pa'], e:'🦵'},
+  {w:'tama', parts:['ta','ma'], e:'✅'},
+  {w:'lapis', parts:['la','pis'], e:'✏️'},
+  {w:'gabi', parts:['ga','bi'], e:'🌙'},
+  {w:'malayo', parts:['ma','la','yo'], e:'🛣️'},
+  {w:'hari', parts:['ha','ri'], e:'👑'},
+  {w:'dahon', parts:['da','hon'], e:'🍃'},
+  {w:'tubig', parts:['tu','big'], e:'💧'}
+];
+
+/* ================= EXERCISE LEVELS ================= */
+const LEVELS = {
+  tunog: {label:'Antas 1: Tunog', items: SOUNDS.slice(0,20).map(x=>x.s)},
+  pantig: {label:'Antas 2: Pantig', items: ['ma','sa','pa','ta','ba','ni','bo','ge','tu','lo','hi','ra','ye','ka','di']},
+  salita: {label:'Antas 3: Salita', items: ['mama','bata','sipa','tama','lapis','gabi','malayo','hari','dahon','tubig','nanay','daga','itlog','wasay','bola']},
+  pangungusap: {label:'Antas 4: Pangungusap', items: [
+    'Si Nanay ay tama.',
+    'May bola ang bata.',
+    'Lumalapit ang ulan.',
+    'Hinugasan ni Lola ang gabi.',
+    'Malayo ang bahay ni Tata.',
+    'Maingay ang itik sa gabi.',
+    'Si Mama ay nagluto ng sili.',
+    'Naglaro ng bola ang bata sa daan.'
+  ]},
+  talata: {label:'Antas 5: Talata', items: [
+    'Si Bata ay malaya sa bahay. Naglaro siya ng bola sa labas. Pagkatapos, uminom siya ng tubig.',
+    'Maulan ngayon sa gabi. Tahimik ang mga ibon sa labas. Si Nanay ay nagluto ng sili. Masarap ang hapunan nila.',
+    'May daga sa tabi ng dahon. Tumakbo ito papalayo. Hinabol ito ng pusa hanggang sa daan.'
+  ]}
+};
+
+/* ================= STATE (in-memory only, no localStorage) ================= */
+let masteredSounds = new Set();
+let blend = {cons:null, vowel:null};
+let wordBuilderState = {};
+let currentLevelKey = 'tunog';
+let currentIndex = 0;
+let stats = {tunog:{a:0,c:0}, pantig:{a:0,c:0}, salita:{a:0,c:0}, pangungusap:{a:0,c:0}};
+let recognition = null;
+let listening = false;
+let speakStartTime = null;
+let wbMode = false;
+let wbActiveWord = null;
+let wbActiveIdx = null;
+let blendMode = false;
+let blendTarget = null;
+
+/* ================= SPEECH SYNTHESIS ================= */
+function speak(text, rate){
+  if(!('speechSynthesis' in window)) return;
+  window.speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(text);
+  u.rate = rate || 0.85;
+  u.lang = 'fil-PH';
+  const voices = window.speechSynthesis.getVoices();
+  const filVoice = voices.find(v => v.lang && /^(fil|tl)/i.test(v.lang)) ||
+                   voices.find(v => /filipino|tagalog/i.test(v.name || ''));
+  if(filVoice) u.voice = filVoice;
+  window.speechSynthesis.speak(u);
+}
+function stopSpeaking(){
+  if('speechSynthesis' in window) window.speechSynthesis.cancel();
+  playAllCancelled = true;
+}
+function speakPraise(){
+  if(!('speechSynthesis' in window)) return;
+  window.speechSynthesis.cancel();
+  const praises = ['Very good!', 'Excellent!', 'Great job!', 'Well done!'];
+  const msg = praises[Math.floor(Math.random()*praises.length)];
+  const u = new SpeechSynthesisUtterance(msg);
+  u.rate = 1;
+  u.lang = 'en-US';
+  const voices = window.speechSynthesis.getVoices();
+  const enVoice = voices.find(v => v.lang && v.lang.toLowerCase().startsWith('en'));
+  if(enVoice) u.voice = enVoice;
+  window.speechSynthesis.speak(u);
+}
+
+/* ================= DISCUSSION TAB ================= */
+let playAllCancelled = false;
+function renderSoundGrid(){
+  const grid = document.getElementById('soundGrid');
+  grid.innerHTML = '';
+  SOUNDS.forEach((item, idx) => {
+    const div = document.createElement('div');
+    div.className = 'sound-card' + (masteredSounds.has(idx) ? ' mastered' : '');
+    div.tabIndex = 0;
+    div.innerHTML = `<span class="check">✓</span><span class="emoji">${item.e}</span><span class="letter">${item.s}</span><span class="word">${item.w}</span>`;
+    div.addEventListener('click', () => {
+      speak(item.s);
+      masteredSounds.add(idx);
+      renderSoundGrid();
+    });
+    grid.appendChild(div);
+  });
+  document.getElementById('masteredCount').textContent = masteredSounds.size;
+}
+
+document.getElementById('playAllBtn').addEventListener('click', () => {
+  playAllCancelled = false;
+  let i = 0;
+  function step(){
+    if(playAllCancelled || i >= SOUNDS.length) return;
+    speak(SOUNDS[i].s);
+    masteredSounds.add(i);
+    renderSoundGrid();
+    i++;
+    setTimeout(step, 1100);
+  }
+  step();
+});
+document.getElementById('stopAllBtn').addEventListener('click', stopSpeaking);
+
+/* ================= MANIPULATIVES TAB ================= */
+function renderTiles(){
+  const cWrap = document.getElementById('consTiles');
+  const vWrap = document.getElementById('vowelTiles');
+  cWrap.innerHTML = '';
+  vWrap.innerHTML = '';
+  CONSONANTS.forEach(c => {
+    const t = document.createElement('div');
+    t.className = 'tile' + (blend.cons === c ? ' selected' : '');
+    t.textContent = c;
+    t.tabIndex = 0;
+    t.addEventListener('click', () => { blend.cons = c; renderTiles(); updateBlendDisplay(); });
+    cWrap.appendChild(t);
+  });
+  VOWELS.forEach(v => {
+    const t = document.createElement('div');
+    t.className = 'tile' + (blend.vowel === v ? ' selected' : '');
+    t.textContent = v;
+    t.tabIndex = 0;
+    t.addEventListener('click', () => { blend.vowel = v; renderTiles(); updateBlendDisplay(); });
+    vWrap.appendChild(t);
+  });
+}
+function updateBlendDisplay(){
+  const disp = document.getElementById('blendDisplay');
+  if(blend.cons && blend.vowel){
+    disp.textContent = blend.cons + blend.vowel;
+  } else {
+    disp.textContent = (blend.cons || '—') + ' ' + (blend.vowel || '—');
+  }
+}
+document.getElementById('blendMicBtn').addEventListener('click', () => {
+  if(!recognition){ alert('Hindi suportado ng browser na ito ang mikropono. Gamitin ang Chrome.'); return; }
+  if(!blend.cons || !blend.vowel){
+    document.getElementById('blendTranscript').textContent = 'Piliin muna ang katinig at patinig.';
+    return;
+  }
+  if(listening){ recognition.stop(); return; }
+  wbMode = false; blendMode = true;
+  blendTarget = blend.cons + blend.vowel;
+  recognition.continuous = false;
+  recognition.interimResults = false;
+  try{ recognition.start(); }catch(err){}
+});
+document.getElementById('blendClearBtn').addEventListener('click', () => {
+  blend = {cons:null, vowel:null};
+  renderTiles();
+  updateBlendDisplay();
+  document.getElementById('blendTranscript').textContent = '';
+});
+
+function renderWordBuilder(){
+  const area = document.getElementById('wordBuilderArea');
+  area.innerHTML = '';
+  SYLLABLE_WORDS.forEach((item, wIdx) => {
+    if(!wordBuilderState[wIdx]) wordBuilderState[wIdx] = [];
+    const row = document.createElement('div');
+    row.style.marginBottom = '16px';
+    row.style.paddingBottom = '12px';
+    row.style.borderBottom = '1px solid #F1EBDA';
+
+    const shuffled = [...item.parts].sort(() => Math.random() - 0.5);
+    const built = wordBuilderState[wIdx];
+    const isComplete = built.length === item.parts.length && built.join('') === item.parts.join('');
+
+    row.innerHTML = `
+      <div style="display:flex; align-items:center; gap:10px; margin-bottom:8px; flex-wrap:wrap;">
+        <span style="font-size:22px;">${item.e}</span>
+        <span class="blend-display" style="font-size:20px; padding:8px 16px; min-width:auto;">${built.join('') || '—'}</span>
+        ${isComplete ? `<button class="mic-btn wb-mic" style="width:42px;height:42px;font-size:18px;" data-word="${item.w}" data-widx="${wIdx}">🎤</button>` : ''}
+        ${isComplete ? '<span class="wb-feedback" data-widx="'+wIdx+'" style="font-weight:800; font-size:13px;"></span>' : ''}
+      </div>
+      <div class="wordbank" data-widx="${wIdx}"></div>
+    `;
+    const micBtnEl = row.querySelector('.wb-mic');
+    if(micBtnEl){
+      micBtnEl.addEventListener('click', () => {
+        if(!recognition){
+          alert('Hindi suportado ng browser na ito ang mikropono. Gamitin ang Chrome.');
+          return;
+        }
+        if(listening){ recognition.stop(); return; }
+        wbActiveWord = micBtnEl.dataset.word;
+        wbActiveIdx = micBtnEl.dataset.widx;
+        wbMode = true;
+        blendMode = false;
+        try{ recognition.start(); }catch(err){}
+      });
+    }
+    const bank = row.querySelector('.wordbank');
+    shuffled.forEach(syl => {
+      const chip = document.createElement('span');
+      chip.className = 'wordchip';
+      chip.textContent = syl;
+      chip.addEventListener('click', () => {
+        if(isComplete) return;
+        wordBuilderState[wIdx].push(syl);
+        speak(syl, 0.7);
+        renderWordBuilder();
+        if(wordBuilderState[wIdx].length >= item.parts.length && wordBuilderState[wIdx].join('') !== item.parts.join('')){
+          setTimeout(() => { wordBuilderState[wIdx] = []; renderWordBuilder(); }, 700);
+        }
+      });
+      bank.appendChild(chip);
+    });
+    area.appendChild(row);
+  });
+}
+
+/* ================= TAB SWITCHING ================= */
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('panel-' + btn.dataset.tab).classList.add('active');
+  });
+});
+
+/* ================= EXERCISES TAB ================= */
+function shuffleIndices(n){
+  const arr = Array.from({length:n}, (_,i) => i);
+  for(let i=arr.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [arr[i],arr[j]] = [arr[j],arr[i]];
+  }
+  return arr;
+}
+let levelOrder = {};
+function reshuffleLevel(key){
+  levelOrder[key] = shuffleIndices(LEVELS[key].items.length);
+}
+Object.keys(LEVELS).forEach(reshuffleLevel); // randomized order on every load/session
+
+function isLongForm(key){ return key === 'pangungusap' || key === 'talata'; }
+
+function renderLevelNav(){
+  const nav = document.getElementById('levelNav');
+  nav.innerHTML = '';
+  Object.keys(LEVELS).forEach(key => {
+    const chip = document.createElement('button');
+    chip.className = 'level-chip' + (key === currentLevelKey ? ' active' : '');
+    chip.textContent = LEVELS[key].label;
+    chip.addEventListener('click', () => {
+      currentLevelKey = key; currentIndex = 0;
+      reshuffleLevel(key);
+      renderLevelNav(); showTarget();
+    });
+    nav.appendChild(chip);
+  });
+}
+
+function showTarget(){
+  const level = LEVELS[currentLevelKey];
+  if(currentIndex >= levelOrder[currentLevelKey].length){
+    reshuffleLevel(currentLevelKey);
+    currentIndex = 0;
+  }
+  const realIdx = levelOrder[currentLevelKey][currentIndex];
+  const item = level.items[realIdx];
+  document.getElementById('targetText').textContent = item;
+  document.getElementById('feedback').textContent = '';
+  document.getElementById('feedback').className = 'feedback';
+  document.getElementById('transcriptLine').textContent = '';
+  const hintEl = document.getElementById('targetHint');
+  hintEl.textContent = (currentLevelKey === 'tunog' && SOUND_KEYWORD_MAP[item])
+    ? 'Pahiwatig: maaari mong sabihin ang tunog mismo o ang halimbawang salita — "' + SOUND_KEYWORD_MAP[item] + '"'
+    : '';
+  document.getElementById('hearBtn').style.display = isLongForm(currentLevelKey) || currentLevelKey === 'salita' ? 'none' : 'inline-flex';
+  document.getElementById('micBtn').textContent = (isLongForm(currentLevelKey) && listening) ? '⏹' : '🎤';
+  updateScoreDisplay();
+}
+
+function updateScoreDisplay(){
+  const st = stats[currentLevelKey];
+  document.getElementById('statAttempts').textContent = st.a;
+  document.getElementById('statCorrect').textContent = st.c;
+  document.getElementById('statAcc').textContent = st.a ? Math.round((st.c/st.a)*100) + '%' : '0%';
+}
+
+document.getElementById('hearBtn').addEventListener('click', () => {
+  const text = document.getElementById('targetText').textContent;
+  speak(text, currentLevelKey === 'pangungusap' ? 0.9 : 0.75);
+});
+document.getElementById('nextBtn').addEventListener('click', () => {
+  currentIndex++;
+  showTarget();
+});
+
+/* Levenshtein-based fuzzy similarity (0 to 1) */
+function similarity(a, b){
+  a = a.toLowerCase().trim(); b = b.toLowerCase().trim();
+  if(a === b) return 1;
+  const m = a.length, n = b.length;
+  if(m === 0 || n === 0) return 0;
+  const dp = Array.from({length:m+1}, () => new Array(n+1).fill(0));
+  for(let i=0;i<=m;i++) dp[i][0]=i;
+  for(let j=0;j<=n;j++) dp[0][j]=j;
+  for(let i=1;i<=m;i++){
+    for(let j=1;j<=n;j++){
+      dp[i][j] = a[i-1]===b[j-1] ? dp[i-1][j-1] : 1+Math.min(dp[i-1][j-1], dp[i-1][j], dp[i][j-1]);
+    }
+  }
+  const dist = dp[m][n];
+  return 1 - dist / Math.max(m,n);
+}
+
+/* Word-level accuracy for sentence-level reading (fixes character-level
+   blind spot where dropping a whole short word barely moves the score) */
+function wordLevelAccuracy(transcript, target){
+  const norm = s => s.toLowerCase().replace(/[.,!?¿¡]/g,'').trim().split(/\s+/).filter(Boolean);
+  const targetWords = norm(target);
+  const transcriptWords = norm(transcript);
+  if(targetWords.length === 0) return 0;
+  const used = new Array(transcriptWords.length).fill(false);
+  let matched = 0;
+  targetWords.forEach(tw => {
+    let bestIdx = -1, bestSim = 0;
+    transcriptWords.forEach((sw, idx) => {
+      if(used[idx]) return;
+      const sim = similarity(sw, tw);
+      if(sim > bestSim){ bestSim = sim; bestIdx = idx; }
+    });
+    if(bestIdx >= 0 && bestSim >= 0.75){ matched++; used[bestIdx] = true; }
+  });
+  return matched / targetWords.length;
+}
+
+/* ================= SPEECH RECOGNITION ================= */
+const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+let continuousBuffer = '';
+if(!SR){
+  document.getElementById('micWarning').innerHTML = '<div class="browser-warn">⚠️ Hindi suportado ng browser na ito ang speech recognition. Gamitin ang Google Chrome sa desktop o Android para sa mikropono. Magagamit pa rin ang "Pakinggan" button.</div>';
+  document.getElementById('micBtn').disabled = true;
+} else {
+  recognition = new SR();
+  recognition.lang = 'fil-PH';
+  recognition.maxAlternatives = 3;
+
+  recognition.onstart = () => {
+    listening = true;
+    speakStartTime = Date.now();
+    if(wbMode){
+      const btn = document.querySelector('.wb-mic[data-widx="'+wbActiveIdx+'"]');
+      if(btn) btn.classList.add('listening');
+    } else if(blendMode){
+      document.getElementById('blendMicBtn').classList.add('listening');
+    } else {
+      document.getElementById('micBtn').classList.add('listening');
+      if(isLongForm(currentLevelKey)){
+        document.getElementById('micBtn').textContent = '⏹';
+        document.getElementById('feedback').className = 'feedback';
+        document.getElementById('feedback').textContent = 'Nakikinig... i-tap ulit ang ⏹ kapag tapos na basahin.';
+      }
+    }
+  };
+  recognition.onend = () => {
+    listening = false;
+    document.querySelectorAll('.mic-btn').forEach(b => b.classList.remove('listening'));
+    document.getElementById('micBtn').textContent = '🎤';
+
+    if(!wbMode && isLongForm(currentLevelKey)){
+      const elapsedSec = (Date.now() - speakStartTime) / 1000;
+      const target = document.getElementById('targetText').textContent;
+      const heard = continuousBuffer.trim();
+      continuousBuffer = '';
+      if(!heard){
+        document.getElementById('feedback').className = 'feedback bad';
+        document.getElementById('feedback').textContent = 'Walang narinig. Subukan ulit.';
+        return;
+      }
+      document.getElementById('transcriptLine').textContent = 'Narinig: "' + heard + '"';
+      const bestSim = wordLevelAccuracy(heard, target);
+      const threshold = currentLevelKey === 'pangungusap' ? 0.85 : 0.8;
+      const isCorrect = bestSim >= threshold;
+      stats[currentLevelKey].a++;
+      if(isCorrect) stats[currentLevelKey].c++;
+      updateScoreDisplay();
+
+      const fbEl = document.getElementById('feedback');
+      if(isCorrect){
+        fbEl.className = 'feedback good';
+        fbEl.textContent = '✓ Magaling! Tamang pagbasa.';
+        speakPraise();
+      } else {
+        fbEl.className = 'feedback bad';
+        fbEl.textContent = '✗ Subukan ulit. May salitang hindi nabigkas o nagkamali.';
+      }
+      const wordCount = target.split(/\s+/).length;
+      const wpm = Math.round((wordCount / elapsedSec) * 60);
+      document.getElementById('statWpm').textContent = isFinite(wpm) ? wpm : '—';
+    }
+  };
+  recognition.onerror = (e) => {
+    listening = false;
+    document.querySelectorAll('.mic-btn').forEach(b => b.classList.remove('listening'));
+    document.getElementById('micBtn').textContent = '🎤';
+    const msg = (e.error === 'no-speech')
+      ? 'Walang narinig. Magsalita nang mas malakas at mas matagal, lalo na sa nag-iisang tunog.'
+      : 'Hindi nakuha ang tunog. Subukan ulit.';
+    if(wbMode){
+      const span = document.querySelector('.wb-feedback[data-widx="'+wbActiveIdx+'"]');
+      if(span){ span.style.color = 'var(--warn)'; span.textContent = msg; }
+      wbMode = false;
+    } else if(blendMode){
+      document.getElementById('blendTranscript').textContent = msg;
+      blendMode = false;
+    } else if(!isLongForm(currentLevelKey)) {
+      document.getElementById('feedback').className = 'feedback bad';
+      document.getElementById('feedback').textContent = msg;
+    }
+    continuousBuffer = '';
+  };
+  recognition.onresult = (e) => {
+    if(wbMode){
+      let bestSim = 0, bestTranscript = '';
+      for(let i=0;i<e.results[0].length;i++){
+        const t = e.results[0][i].transcript;
+        const sim = similarity(t, wbActiveWord);
+        if(sim > bestSim){ bestSim = sim; bestTranscript = t; }
+      }
+      const span = document.querySelector('.wb-feedback[data-widx="'+wbActiveIdx+'"]');
+      if(span){
+        span.textContent = 'Narinig: "' + bestTranscript + '"';
+        if(bestSim >= 0.65){
+          span.style.color = 'var(--good)';
+          speakPraise();
+        } else {
+          span.style.color = 'var(--warn)';
+        }
+      }
+      wbMode = false;
+      return;
+    }
+
+    if(blendMode){
+      let bestSim = 0, bestTranscript = '';
+      for(let i=0;i<e.results[0].length;i++){
+        const t = e.results[0][i].transcript;
+        const sim = similarity(t, blendTarget);
+        if(sim > bestSim){ bestSim = sim; bestTranscript = t; }
+      }
+      const tEl = document.getElementById('blendTranscript');
+      tEl.textContent = 'Narinig: "' + bestTranscript + '"';
+      if(bestSim >= 0.6){
+        tEl.style.color = 'var(--good)';
+        speakPraise();
+      } else {
+        tEl.style.color = 'var(--warn)';
+      }
+      blendMode = false;
+      return;
+    }
+
+    if(isLongForm(currentLevelKey)){
+      // Accumulate every final chunk while the user keeps talking; scoring happens on manual stop (onend).
+      for(let i=e.resultIndex; i<e.results.length; i++){
+        if(e.results[i].isFinal){
+          continuousBuffer += ' ' + e.results[i][0].transcript;
+        }
+      }
+      document.getElementById('transcriptLine').textContent = 'Narinig (patuloy): "' + continuousBuffer.trim() + '"';
+      return;
+    }
+
+    const target = document.getElementById('targetText').textContent;
+    const keyword = SOUND_KEYWORD_MAP[target] || null;
+    let bestSim = 0, bestTranscript = '';
+    for(let i=0;i<e.results[0].length;i++){
+      const t = e.results[0][i].transcript;
+      let sim = similarity(t, target);
+      if(currentLevelKey === 'tunog' && keyword){
+        sim = Math.max(sim, similarity(t, keyword));
+      }
+      if(sim > bestSim){ bestSim = sim; bestTranscript = t; }
+    }
+    document.getElementById('transcriptLine').textContent = 'Narinig: "' + bestTranscript + '"';
+
+    const threshold = currentLevelKey === 'tunog' ? 0.5 : 0.65;
+    const isCorrect = bestSim >= threshold;
+    stats[currentLevelKey].a++;
+    if(isCorrect) stats[currentLevelKey].c++;
+    updateScoreDisplay();
+
+    const fbEl = document.getElementById('feedback');
+    if(isCorrect){
+      fbEl.className = 'feedback good';
+      const praises = ['Magaling!', 'Tama!', 'Husay!', 'Mahusay!'];
+      fbEl.textContent = '✓ ' + praises[Math.floor(Math.random()*praises.length)];
+      speakPraise();
+    } else {
+      fbEl.className = 'feedback bad';
+      fbEl.textContent = currentLevelKey === 'tunog'
+        ? '✗ Subukan ulit. Maaari mong sabihin ang tunog o ang halimbawang salita (' + (keyword || '') + ').'
+        : '✗ Subukan ulit. Pakinggan muna, pagkatapos basahin.';
+    }
+  };
+}
+
+document.getElementById('micBtn').addEventListener('click', () => {
+  if(!recognition) return;
+  wbMode = false;
+  blendMode = false;
+  if(listening){ recognition.stop(); return; }
+  continuousBuffer = '';
+  recognition.continuous = isLongForm(currentLevelKey);
+  recognition.interimResults = false;
+  try{ recognition.start(); }catch(err){}
+});
+
+/* ================= GOOGLE SHEETS LOGGING ================= */
+document.getElementById('logBtn').addEventListener('click', () => {
+  const url = document.getElementById('gasUrl').value.trim();
+  const name = document.getElementById('studentName').value.trim();
+  const section = document.getElementById('studentSection').value.trim();
+  const school = document.getElementById('studentSchool').value.trim();
+  const district = document.getElementById('studentDistrict').value.trim();
+  const statusEl = document.getElementById('logStatus');
+
+  if(!url){
+    statusEl.textContent = 'Walang Google Apps Script URL na inilagay — hindi naisave sa Sheets, pero narito ang resulta sa screen.';
+    statusEl.style.color = 'var(--warn)';
+    return;
+  }
+  const payload = {
+    pangalan: name || '(walang pangalan)',
+    seksyon: section || '',
+    paaralan: school || '',
+    distrito: district || '',
+    antas: LEVELS[currentLevelKey].label,
+    subok: stats[currentLevelKey].a,
+    tama: stats[currentLevelKey].c,
+    katumpakan: stats[currentLevelKey].a ? Math.round((stats[currentLevelKey].c/stats[currentLevelKey].a)*100) : 0,
+    petsa: new Date().toISOString()
+  };
+  fetch(url, {
+    method: 'POST',
+    mode: 'no-cors',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify(payload)
+  }).then(() => {
+    statusEl.textContent = '✓ Naipadala ang resulta. (Hindi makumpirma ang tagumpay dahil sa no-cors mode — tingnan ang Sheet para sa kumpirmasyon.)';
+    statusEl.style.color = 'var(--good)';
+  }).catch(() => {
+    statusEl.textContent = 'May error sa pagpadala. Suriin ang URL.';
+    statusEl.style.color = 'var(--warn)';
+  });
+});
+
+/* ================= INIT ================= */
+renderSoundGrid();
+renderTiles();
+updateBlendDisplay();
+renderWordBuilder();
+renderLevelNav();
+showTarget();
+
+if('speechSynthesis' in window){
+  window.speechSynthesis.onvoiceschanged = () => {};
+}
+</script>
+</body>
+</html>
