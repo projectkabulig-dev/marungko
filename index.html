@@ -781,7 +781,11 @@ if(!SR){
       }
       document.getElementById('transcriptLine').textContent = 'Narinig: "' + heard + '"';
       const bestSim = wordLevelAccuracy(heard, target);
-      const threshold = 1;
+      let threshold = 1;
+      if(currentLevelKey === 'talata'){
+        const totalWords = target.split(/\s+/).filter(Boolean).length;
+        threshold = Math.max(0.88, (totalWords - 1) / totalWords); // allow ~1 missed word on longer passages
+      }
       const isCorrect = bestSim >= threshold;
       stats[currentLevelKey].a++;
       if(isCorrect) stats[currentLevelKey].c++;
